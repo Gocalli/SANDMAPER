@@ -1,0 +1,19 @@
+{
+    "calibration": {
+        "m": -2.9175970905385072e-05,
+        "b": 0.031728602565160746
+    },
+    "box_geometry": {
+        "distancia_fondo_caja": 60.0
+    },
+    "roi": {
+        "x": 80,
+        "y": 60,
+        "w": 480,
+        "h": 360
+    },
+    "visualization": {
+        "altura_minima": 0.0,
+        "altura_maxima": 12.0
+    }
+}

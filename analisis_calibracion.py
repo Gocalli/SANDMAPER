@@ -22,13 +22,47 @@ def modelo_kinect(raw, m, b):
 popt, pcov = curve_fit(modelo_kinect, x_raw, y_cm, p0=[-0.00001, 0.1]) # Valores iniciales estimados
 m_calculada, b_calculada = popt
 
+# 4. GUARDAR RESULTADOS EN CONFIG.JSON
+import json
+import os
+
 print("="*40)
 print("      RESULTADOS DE LA CALIBRACIÓN")
 print("="*40)
 print(f"Ecuación encontrada: Distancia = 1 / ({m_calculada:.6f} * Raw + {b_calculada:.6f})")
-print("-" * 40)
-print("COPIA ESTA LÍNEA PARA TU CÓDIGO PRINCIPAL:")
-print(f"dist_cm = 1.0 / ({m_calculada:.8f} * raw_val + {b_calculada:.8f})")
+
+config_path = "config.json"
+config_data = {}
+
+# Cargar config existente si existe para preservar otros ajustes
+if os.path.exists(config_path):
+    try:
+        with open(config_path, "r") as f:
+            config_data = json.load(f)
+    except Exception as e:
+        print(f"Advertencia: No se pudo leer {config_path}, se creará uno nuevo. Error: {e}")
+
+# Asegurar estructura
+if "calibration" not in config_data:
+    config_data["calibration"] = {}
+
+# Actualizar valores (convertimos a float estándar para JSON)
+config_data["calibration"]["m"] = float(m_calculada)
+config_data["calibration"]["b"] = float(b_calculada)
+
+# Guardar
+try:
+    with open(config_path, "w") as f:
+        json.dump(config_data, f, indent=4)
+    print("-" * 40)
+    print(f"¡EXITO! Calibración guardada automáticamente en '{config_path}'")
+    print("Ya puedes ejecutar 'sandmapper_final.py' sin editar nada.")
+except Exception as e:
+    print(f"ERROR: No se pudo guardar en {config_path}. Error: {e}")
+    print("-" * 40)
+    print("COPIA ESTA LÍNEA MANUALMENTE:")
+    print(f"dist_cm = 1.0 / ({m_calculada:.8f} * raw_val + {b_calculada:.8f})")
+
 print("="*40)
 
 # 4. GENERAR GRAFICAS PARA EL INFORME
