@@ -3,9 +3,13 @@ import cv2
 import numpy as np
 import csv
 import time
+import os
+
+# Asegurar que el directorio existe
+os.makedirs("src/data", exist_ok=True)
 
 # Nombre del archivo donde se guardarán los datos
-ARCHIVO_SALIDA = "calibracion_kinect.csv"
+ARCHIVO_SALIDA = "src/data/calibracion_kinect.csv"
 
 def get_depth():
     """Obtiene una imagen de profundidad del Kinect"""

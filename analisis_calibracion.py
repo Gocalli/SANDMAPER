@@ -2,14 +2,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from scipy.optimize import curve_fit
+import os
+
+# Rutas de archivos
+CSV_PATH = "src/data/calibracion_kinect.csv"
+GRAPH_PATH = "src/data/grafica_calibracion.png"
 
 # 1. CARGAR DATOS
 try:
-    df = pd.read_csv("calibracion_kinect.csv")
+    df = pd.read_csv(CSV_PATH)
     x_raw = df["Valor_Kinect_Raw"].values
     y_cm = df["Distancia_Real_CM"].values
 except FileNotFoundError:
-    print("ERROR: No encuentro el archivo 'calibracion_kinect.csv'. Asegúrate de que esté en la misma carpeta.")
+    print(f"ERROR: No encuentro el archivo '{CSV_PATH}'. Asegúrate de haber recolectado los datos primero.")
     exit()
 
 # 2. DEFINIR LA FUNCION DE CALIBRACION (Modelo Inverso)
@@ -81,5 +86,5 @@ plt.xlabel("Valor Crudo (Raw 11-bit)")
 plt.ylabel("Distancia Real (cm)")
 plt.grid(True, which='both', linestyle='--', alpha=0.7)
 plt.legend()
-plt.savefig("grafica_calibracion.png") # Guarda la imagen automáticamente
+plt.savefig(GRAPH_PATH) # Guarda la imagen automáticamente en src/data/
 plt.show()

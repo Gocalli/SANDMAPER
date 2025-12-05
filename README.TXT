@@ -1,83 +1,83 @@
 ================================================================
-# Sandmapper - Caja de Arena de Realidad Aumentada con Kinect v1
+SANDMAPER - Topografía Interactiva AR
 ================================================================
 
-Este proyecto utiliza un sensor Kinect de Xbox 360 para crear un mapa topográfico interactivo sobre una caja de arena. La profundidad de la arena se convierte en un mapa de colores con curvas de nivel, proyectando una topografía virtual que cambia en tiempo real según se moldea la arena.
+Bienvenido a SandMapper. Este sistema transforma una caja de arena convencional en un paisaje topográfico interactivo utilizando un sensor Kinect v1 y un proyector digital.
 
-## Estructura del Proyecto
+## Requisitos del Sistema
 
-El proyecto se compone de varios archivos clave:
+- Hardware:
+  - Sensor Microsoft Kinect v1 (Modelo 1414/1473).
+  - Proyector (Resolución recomendada: 1280x800).
+  - Computadora con Linux.
+  - Caja de arena (dimensiones sugeridas: 60x40 cm).
 
-- `recolector_datos.py`:
-  - **Propósito**: Herramienta para capturar los datos necesarios para calibrar el sensor.
-  - **Funcionamiento**: Muestra la vista de profundidad del Kinect y permite guardar pares de valores: la distancia real (medida manualmente en cm) y el valor "crudo" (raw) que entrega el sensor para esa distancia. Los datos se guardan en `calibracion_kinect.csv`.
+- Software:
+  - Python 3.
+  - Librerías: `freenect`, `opencv-python`, `numpy`.
 
-- `analisis_calibracion.py`:
-  - **Propósito**: Analiza los datos recolectados y calcula la fórmula matemática para convertir el valor raw del Kinect a centímetros.
-  - **Funcionamiento**: Lee `calibracion_kinect.csv`, aplica una regresión no lineal para encontrar los coeficientes de la ecuación de calibración, muestra la ecuación resultante por consola y guarda una gráfica (`grafica_calibracion.png`) que visualiza la curva de ajuste.
+## Configuración Inicial y Calibración
 
-- `sandmapper_final.py`:
-  - **Propósito**: Es la aplicación principal que corre el mapa topográfico.
-  - **Funcionamiento**: Usa la fórmula de calibración para obtener mediciones de distancia en cm. Luego, calcula la altura de la arena basándose en la distancia al fondo de la caja y genera un mapa de colores (de azul para lo más bajo a rojo para lo más alto) con curvas de nivel que se actualiza en tiempo real.
+Sigue estos pasos la primera vez que instales el sistema o si mueves el Kinect de posición.
 
-- `calibracion_kinect.csv`:
-  - Archivo generado por `recolector_datos.py`. Contiene las mediciones para la calibración.
+### 1. Calibración de Profundidad
+Para que el sistema mida correctamente la altura de la arena en centímetros:
 
-- `grafica_calibracion.png`:
-  - Imagen generada por `analisis_calibracion.py` que muestra la calidad del ajuste de la calibración.
+1.  Activa el entorno:
+    `source sandmapper_env/bin/activate`
+2.  Ejecuta el recolector de datos:
+    `python3 recolector_datos.py`
+3.  Coloca un objeto plano frente al Kinect a una distancia conocida (mide con cinta métrica).
+4.  Apunta el cursor al objeto y presiona `Espacio`.
+5.  Ingresa la distancia real en cm y presiona `Enter`.
+6.  Repite para al menos 5-10 distancias diferentes (ej: entre 40cm y 80cm).
+7.  Presiona `q` para salir.
+8.  Genera la configuración automática:
+    `python3 analisis_calibracion.py`
+    Esto creará/actualizará el archivo `config.json`.
 
-- `README.TXT`:
-  - Este mismo archivo, con la documentación del proyecto.
+### 2. Configuración Geométrica (Ajuste de Imagen)
+Para alinear la proyección exactamente con tu caja de arena:
 
-## ¿Cómo Usarlo?
+1.  Ejecuta el programa principal:
+    `python3 sandmapper_final.py`
+2.  Presiona la tecla **'M'** para entrar en el **Modo de Ajuste**.
+3.  Verás un recuadro amarillo. Úsalo para encuadrar tu arena:
+    - **W / S**: Mover recuadro Arriba/Abajo.
+    - **A / D**: Mover recuadro Izquierda/Derecha.
+    - **I / K**: Aumentar/Disminuir Altura del recuadro.
+    - **J / L**: Aumentar/Disminuir Ancho del recuadro.
+4.  Una vez alineado, presiona **'G'** para **Guardar**.
+5.  Presiona **'M'** de nuevo para salir del modo ajuste.
 
-Sigue estos pasos en orden para poner en marcha el sistema.
+### 3. Inclinación del Kinect
+Si necesitas ajustar el ángulo físico del sensor:
+- Usa las **Flechas Arriba / Abajo** del teclado para mover el motor del Kinect.
 
-### Paso 1: Recolectar Datos para Calibración
+## Guía de Uso Diario
 
-Este es el paso más importante para que las mediciones sean precisas.
+Una vez calibrado, solo necesitas ejecutar:
 
-1.  **Ejecuta el script de recolección**:
-    ```bash
-    python3 recolector_datos.py
-    ```
-2.  **Prepara la caja**: Coloca un objeto plano (como una tabla o la propia base de la caja vacía) a una distancia conocida del Kinect. Mide esta distancia con una cinta métrica.
-3.  **Captura los datos**:
-    - En la ventana que aparece, apunta el centro (marcado con un rectángulo) al objeto.
-    - Presiona la **barra espaciadora**. El script promediará varias lecturas para mayor precisión.
-    - Introduce en la terminal la distancia real que mediste (en cm) y presiona Enter.
-4.  **Repite**: Repite el proceso para diferentes distancias (se recomienda un mínimo de 10 puntos, cubriendo el rango de alturas de tu caja, por ejemplo, desde 40 cm hasta 60 cm).
-5.  **Finaliza**: Presiona la tecla `q` para cerrar el recolector. Esto habrá creado o actualizado el archivo `calibracion_kinect.csv`.
+```bash
+source sandmapper_env/bin/activate
+python3 sandmapper_final.py
+```
 
-### Paso 2: Analizar y Obtener la Ecuación de Calibración
+### Controles de Visualización
+Controla cómo se ve el mapa mientras interactúas con la arena:
 
-Una vez que tienes los datos, necesitas la fórmula.
+- **W / S**: Ajusta la **Altura Máxima** (Color rojo/blanco). Si tu montaña se ve "cortada", aumenta este valor.
+- **A / D**: Ajusta la **Altura Mínima** (Color azul). Ajusta esto al fondo de tu caja.
+- **C**: Cambia la **Paleta de Colores** (Topográfico, Arcoíris, Volcán, etc.).
+- **H**: Activa/Desactiva las **Sombras 3D** (Hillshading) para dar relieve.
+- **R**: Resetea los valores de visualización a los predeterminados.
+- **Q**: Salir del programa.
 
-1.  **Ejecuta el script de análisis**:
-    ```bash
-    python3 analisis_calibracion.py
-    ```
-2.  **Observa los resultados**: El script imprimirá en la consola la ecuación de calibración encontrada. Algo como:
-    `dist_cm = 1.0 / (-0.00002918 * raw_val + 0.03172860)`
-3.  **Actualiza el código principal**: Copia la línea de la ecuación y pégala en el script `sandmapper_final.py`, reemplazando los valores de las constantes `M_CALIB` y `B_CALIB` con los nuevos. El script también guarda la gráfica `grafica_calibracion.png` para que compruebes visualmente que los puntos se ajustan bien a la curva.
+### Consejos
+- Para el mejor efecto, mantén el cuarto con luz tenue.
+- Alisa la arena para calibrar la "Altura Mínima" (color azul) correctamente.
+- Si el mapa parpadea o no detecta bien, asegúrate de que no haya luz solar directa sobre el sensor Kinect.
 
-### Paso 3: Ejecutar el Sandmapper
-
-¡Es hora de ver la magia!
-
-1.  **Asegúrate de que la calibración esté actualizada** en `sandmapper_final.py`.
-2.  **Ejecuta el script principal**:
-    ```bash
-    python3 sandmapper_final.py
-    ```
-3.  **Disfruta**: Apunta el Kinect a tu caja de arena. Verás cómo se forma un mapa topográfico de colores sobre la superficie. Moldea la arena y observa cómo el mapa cambia en tiempo real.
-4.  **Finaliza**: Presiona `q` para cerrar la aplicación.
-
-========================================
-      RESULTADOS DE LA CALIBRACIÓN (Ejemplo)
-========================================
-Ecuación encontrada: Distancia = 1 / (-0.000029 * Raw + 0.031729)
-----------------------------------------
-COPIA ESTA LÍNEA PARA TU CÓDIGO PRINCIPAL:
-dist_cm = 1.0 / (-0.00002918 * raw_val + 0.03172860)
-========================================
+## Solución de Problemas
+- **Error "Kinect not found"**: Desconecta y reconecta el USB del Kinect. Asegúrate de usar el adaptador de corriente del Kinect.
+- **La imagen no llena la pantalla**: El programa está diseñado para proyectores de 1280x800. Si usas otra resolución, el sistema operativo o el proyector deberían escalar la imagen, o puedes editar el código en `cv2.resize`.
