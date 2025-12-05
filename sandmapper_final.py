@@ -91,7 +91,39 @@ def apply_hillshade(height_map_uint8, azimuth=315.0, altitude=45.0):
     shaded = (shaded + 1) / 2.0
     return np.clip(shaded, 0, 1)
 
+def crear_paleta_cartografica():
+    """Genera una LUT personalizada con estilo topografico."""
+    # Hitos: (Indice 0-255, (B, G, R))
+    key_colors = [
+        (0,   (128, 0, 0)),      # Azul Oscuro (Profundo)
+        (90,  (255, 255, 0)),    # Cyan (Agua baja)
+        (100, (180, 228, 255)),  # Arena (Beige)
+        (150, (34, 139, 34)),    # Verde Bosque
+        (200, (19, 69, 139)),    # Marron Tierra
+        (240, (100, 100, 100)),  # Gris Roca
+        (255, (255, 255, 255))   # Blanco Nieve
+    ]
+    
+    lut = np.zeros((256, 3), dtype=np.uint8)
+    
+    prev_idx, prev_color = key_colors[0]
+    lut[0] = prev_color # Asegurar inicio
+    
+    for idx, color in key_colors[1:]:
+        len_tramo = idx - prev_idx
+        for i in range(3): # Canales B, G, R
+            lut[prev_idx:idx, i] = np.linspace(prev_color[i], color[i], len_tramo, endpoint=False)
+        prev_idx = idx
+        prev_color = color
+        
+    lut[255] = key_colors[-1][1] # Asegurar final
+    return lut
+
+# Generamos la paleta custom
+LUT_CARTOGRAFICA = crear_paleta_cartografica()
+
 PALETAS = [
+    ("Topografico (Custom)", LUT_CARTOGRAFICA),
     ("Jet (Clasico)", cv2.COLORMAP_JET),
     ("Oceano", cv2.COLORMAP_OCEAN),
     ("Magma (Volcan)", cv2.COLORMAP_MAGMA),
@@ -114,8 +146,16 @@ def generar_mapa_topografico(distancia_cm, min_h, max_h, paleta_idx=0, hillshade
     
     altura_blur = cv2.GaussianBlur(altura_uint8, (5, 5), 0)
     
-    nombre_paleta, id_paleta = PALETAS[paleta_idx % len(PALETAS)]
-    mapa_color = cv2.applyColorMap(altura_blur, id_paleta)
+    nombre_paleta, id_paleta_o_lut = PALETAS[paleta_idx % len(PALETAS)]
+    
+    # Aplicar color segun tipo de paleta
+    if isinstance(id_paleta_o_lut, int):
+        # Paleta estandar de OpenCV
+        mapa_color = cv2.applyColorMap(altura_blur, id_paleta_o_lut)
+    else:
+        # LUT Custom (numpy array)
+        # Usamos indexing de numpy para aplicar la LUT: imagen[y,x] -> indice -> lut[indice]
+        mapa_color = id_paleta_o_lut[altura_blur]
     
     if hillshade:
         shading = apply_hillshade(altura_blur)
