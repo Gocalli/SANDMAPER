@@ -4,13 +4,13 @@
         "b": 0.031728602565160746
     },
     "box_geometry": {
-        "distancia_fondo_caja": 60.0
+        "distancia_fondo_caja": 75.0
     },
     "roi": {
-        "x": 80,
-        "y": 60,
+        "x": 166,
+        "y": 48,
         "w": 310,
-        "h": 332
+        "h": 342
     },
     "visualization": {
         "altura_minima": 0.0,
